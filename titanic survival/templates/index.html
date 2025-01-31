@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanic Survival Prediction</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Titanic Survival Prediction</h1>
+        <img src="static/css/titanicimg.jpg" alt="Titanic Image" class="header-image">
+        
+        <form id="prediction-form">
+            <label for="Pclass">Passenger Class:</label>
+            <select id="Pclass" name="Pclass" required>
+                <option value="1">First Class (1)</option>
+                <option value="2">Second Class (2)</option>
+                <option value="3">Third Class (3)</option>
+            </select>
+
+            <label for="Age">Age:</label>
+            <input type="number" id="Age" name="Age" min="0" max="80" required>
+
+            <label for="SibSp">Siblings/Spouses Aboard:</label>
+            <input type="number" id="SibSp" name="SibSp" min="0" max="5" required>
+
+            <label for="Parch">Parents/Children Aboard:</label>
+            <input type="number" id="Parch" name="Parch" min="0" max="5" required>
+
+            <label for="Fare">Fare:</label>
+            <input type="number" step="0.01" id="Fare" name="Fare" min="0" max="100" required>
+
+            <label>Gender:</label>
+            <select id="male" name="male">
+                <option value="1">Male</option>
+                <option value="0">Female</option>
+            </select>
+
+            <label>Embarked:</label>
+            <select id="Embarked" name="Embarked">
+                <option value="C">Cherbourg (C)</option>
+                <option value="Q">Queenstown (Q)</option>
+                <option value="S">Southampton (S)</option>
+            </select>
+
+            <button type="submit">Predict</button>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById("prediction-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let embarkedValue = document.getElementById("Embarked").value;
+            
+            let formData = [{
+                Pclass: parseInt(document.getElementById("Pclass").value),
+                Age: parseFloat(document.getElementById("Age").value),
+                SibSp: parseInt(document.getElementById("SibSp").value),
+                Parch: parseInt(document.getElementById("Parch").value),
+                Fare: parseFloat(document.getElementById("Fare").value),
+                male: parseInt(document.getElementById("male").value),
+                Q: embarkedValue === "Q" ? 1 : 0,
+                S: embarkedValue === "S" ? 1 : 0
+            }];
+
+            fetch("/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ features: formData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").innerHTML = `<h3>Prediction: ${data.predictions[0] === 1 ? "Survived" : "Did Not Survive"}</h3>`;
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
+</body>
+</html>
